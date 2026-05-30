@@ -1,0 +1,32 @@
+workflows:
+  ios-workflow:
+    name: iOS Debug Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+      - name: Build unsigned IPA
+        script: |
+          flutter build ios --debug --no-codesign
+          mkdir -p build/ios/ipa
+          cd build/ios/iphonesimulator
+          mkdir Payload
+          cp -r Runner.app Payload/
+          zip -r ../ipa/scooter_ble.ipa Payload
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your@email.com
+        notify:
+          success: true
+          failure: true
